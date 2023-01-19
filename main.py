@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 import csv
+import copy
 
 
 class Board:
@@ -47,6 +48,7 @@ class Sp(pygame.sprite.Sprite):
         self.image = self.load_image()
         self.rect = self.image.get_rect()
         all_sprites.add(self)
+        self.cell = None
 
     def load_image(self, colorkey=None):
         fullname = os.path.join('data', self.name)
@@ -70,51 +72,71 @@ class main_board(Board):
         super().__init__(width, height, left, top, cell_size)
         with open(f'data/{f_name}', encoding="utf8") as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
-            map1 = list(reader) # импрот карты из csv файла
+            map1 = list(reader)  # импрот карты из csv файла
             map1[0][0] = map1[0][0][-1:]
-            self.map1 = map1
-            self.map_mas = [[None] * (self.width) for i in range(self.height)] #карта неподвижного
-            self.move_map = [[None] * (self.width) for i in range(self.height)] #карта подвижного
-            self.move_map_mas = [[None] * (self.width) for i in range(self.height)]
+            self.map = map1  # карта неподвижного
+            self.map_mas = [[None] * (self.width) for i in range(self.height)]  # массив неподвижых спрайтов
+            self.moving_map = [[None] * (self.width) for i in range(self.height)]  # карта подвижного
+            self.moving_map_mas = [[None] * (self.width) for i in range(self.height)]  # массив подвижых спрайтов
             self.map_sp = pygame.sprite.Group()
             self.pieces_sp = pygame.sprite.Group()
+            self.extra_sp = pygame.sprite.Group()
+            self.focused = Sp('focused.png')
+            self.focused.cell = None
+            self.dest = 0, 0
 
     def on_click(self, cell):
-        '''self.board[cell[0]][cell[1]] = (self.board[cell[0]][cell[1]] + 1) % 2'''
-
+        self.extra_sp.empty()
+        self.focused.cell = cell
+        self.focused.rect.left = self.left + cell[0] * self.cell_size
+        self.focused.rect.top = self.top + cell[1] * self.cell_size
+        self.extra_sp.add(self.focused)
 
     def render(self, screen):
+        try:
+            if self.dest != (0, 0):
+                if (self.moving_map[self.focused.cell[1] + self.dest[1]][self.focused.cell[0] + self.dest[0]] == None and
+                        self.map[self.focused.cell[1] + self.dest[1]][self.focused.cell[0] + self.dest[0]] not in (
+                        '1', '2', '3')):
+                    new_cell = self.focused.cell[1] + self.dest[1], self.focused.cell[0] + self.dest[0]
+                    self.moving_map[self.focused.cell[1] + self.dest[1]][self.focused.cell[0] + self.dest[0]] = \
+                        self.moving_map[self.focused.cell[1]][self.focused.cell[0]]
+                    self.moving_map[self.focused.cell[1]][self.focused.cell[0]] = None
+                    self.on_click((new_cell[1],new_cell[0]))
+                    self.dest = 0, 0
+        except:
+            pass
         self.pieces_sp.empty()
         for y in range(self.height):
             for x in range(self.width):
-                n = self.move_map[y][x]
-                if n and n not in ('11','12'):
-                    self.move_map_mas[y][x] = Sp(f'{n}.png')
-                    self.move_map_mas[y][x].rect.left = self.left + x * self.cell_size
-                    self.move_map_mas[y][x].rect.top = self.top + y * self.cell_size
-                    self.pieces_sp.add(self.move_map_mas[y][x])
-                elif n in ('11','12'):
-                    self.move_map_mas[y][x] = Sp(f'{n}.png')
-                    self.move_map_mas[y][x].rect.left = self.left + (x-1) * self.cell_size
-                    self.move_map_mas[y][x].rect.top = self.top + (y) * self.cell_size
-                    self.pieces_sp.add(self.move_map_mas[y][x])
+                n = self.moving_map[y][x]
+                if n and n not in ('11', '12'):
+                    self.moving_map_mas[y][x] = Sp(f'{n}.png')
+                    self.moving_map_mas[y][x].rect.left = self.left + x * self.cell_size
+                    self.moving_map_mas[y][x].rect.top = self.top + y * self.cell_size
+                    self.pieces_sp.add(self.moving_map_mas[y][x])
+                elif n in ('11', '12'):
+                    self.moving_map_mas[y][x] = Sp(f'{n}.png')
+                    self.moving_map_mas[y][x].rect.left = self.left + (x - 1) * self.cell_size
+                    self.moving_map_mas[y][x].rect.top = self.top + (y) * self.cell_size
+                    self.pieces_sp.add(self.moving_map_mas[y][x])
         self.pieces_sp.draw(screen)
 
     def first_render(self, screen):
         for y in range(self.height):
             for x in range(self.width):
-                n = self.map1[y][x]
+                n = self.map[y][x]
                 if n == '12' or n == '11':
-                    self.move_map[y][x]=n
+                    self.moving_map[y][x] = n
                     n = '11_1'
-                if int(n) > 4 and n != '11_1': #если подвижый элемент, нарисуй землю
-                    self.move_map[y][x] = n
+                if int(n) > 4 and n != '11_1':  # если подвижый элемент, нарисуй землю
+                    self.moving_map[y][x] = n
                     n = '0'
-                self.map_mas[y][x] = Sp(f'{n}.png') #создание спрайта с номером из csv-карты
+                self.map[y][x] = n
+                self.map_mas[y][x] = Sp(f'{n}.png')  # создание спрайта с номером из csv-карты
                 self.map_mas[y][x].rect.left = self.left + x * self.cell_size
                 self.map_mas[y][x].rect.top = self.top + y * self.cell_size
                 self.map_sp.add(self.map_mas[y][x])
-
 
     def next_move(self):
         '''tmp_board = copy.deepcopy(self.board)
@@ -151,11 +173,23 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                board.get_click(event.pos)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    board.dest = 0, -1
+                if event.key == pygame.K_DOWN:
+                    board.dest = 0, 1
+                if event.key == pygame.K_LEFT:
+                    board.dest = -1, 0
+                if event.key == pygame.K_RIGHT:
+                    board.dest = 1, 0
         screen.fill((0, 0, 0))
         pygame.draw.rect(screen, "#d55800", (
             board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
-        board.map_sp.draw(screen) # создание карты
+        board.map_sp.draw(screen)  # создание карты
         board.render(screen)
+        board.extra_sp.draw(screen)
         if ticks >= speed:
             if time_on:
                 board.next_move()
