@@ -22,11 +22,7 @@ class Board:
         self.cell_size = cell_size
 
     def render(self, screen):
-        for i in range(self.width):
-            for j in range(self.height):
-                pygame.draw.rect(screen, (255, 255, 255),
-                                 (self.left + i * self.cell_size, self.top + j * self.cell_size,
-                                  self.cell_size, self.cell_size), 1)
+        pass
 
     def on_click(self, mouse_pos):
         pass
@@ -52,7 +48,7 @@ class Sp(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         all_sprites.add(self)
 
-    def load_image(self, colorkey = None):
+    def load_image(self, colorkey=None):
         fullname = os.path.join('data', self.name)
         # если файл не существует, то выходим
         if not os.path.isfile(fullname):
@@ -74,10 +70,11 @@ class main_board(Board):
         super().__init__(width, height, left, top, cell_size)
         with open(f'data/{f_name}', encoding="utf8") as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
-            map1 = list(reader)
+            map1 = list(reader) # импрот карты из csv файла
             map1[0][0] = map1[0][0][-1:]
             self.map1 = map1
-
+            self.map_mas = [[None] * (self.width) for i in range(self.height)]
+            self.map_sp = pygame.sprite.Group()
 
     def on_click(self, cell):
         '''self.board[cell[0]][cell[1]] = (self.board[cell[0]][cell[1]] + 1) % 2'''
@@ -94,17 +91,15 @@ class main_board(Board):
                                                                        self.cell_size), 1)'''
 
     def first_render(self, screen):
-        self.map_sp = [[None] * (self.width) for i in range(self.height)]
         for y in range(self.height):
             for x in range(self.width):
                 n = self.map1[y][x]
-                if int(n) > 4:
+                if int(n) > 4: #если подвижый элемент, нарисуй землю
                     n = '0'
-                self.map_sp[y][x] = Sp(f'{n}.png')
-                self.map_sp[y][x].rect.left = self.left + x * self.cell_size
-                self.map_sp[y][x].rect.top = self.top + y * self.cell_size
-
-
+                self.map_mas[y][x] = Sp(f'{n}.png') #создание спрайта с номером из csv-карты
+                self.map_mas[y][x].rect.left = self.left + x * self.cell_size
+                self.map_mas[y][x].rect.top = self.top + y * self.cell_size
+                self.map_sp.add(self.map_mas[y][x])
 
     def next_move(self):
         '''tmp_board = copy.deepcopy(self.board)
@@ -124,30 +119,27 @@ class main_board(Board):
         self.board = copy.deepcopy(tmp_board)'''
 
 
-
 def main():
     pygame.init()
-    pygame.display.set_caption('игра в жизнь')
-    size = width, height = 1920*3/4, 1080*3/4
+    pygame.display.set_caption('игра')
+    size = width, height = 1920 * 3 / 4, 1080 * 3 / 4
     screen = pygame.display.set_mode(size)
     board = main_board(11, 11, 100, 10, 70, 'map1.csv')
     board.set_view(300, 10, 70)
+    board.first_render(screen)
     running = True
     time_on = False
     speed = 15
     ticks = 0
     clock = pygame.time.Clock()
-    main_board.map_sp = pygame.sprite.Group()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
         screen.fill((0, 0, 0))
-        pygame.draw.rect(screen, "#3b1604", (board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))
-        board.first_render(screen)
-        main_board.map_sp.draw(screen)
-        all_sprites.draw(screen)
+        pygame.draw.rect(screen, "#d55800", (
+            board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
+        board.map_sp.draw(screen) # создание карты
         if ticks >= speed:
             if time_on:
                 board.next_move()
