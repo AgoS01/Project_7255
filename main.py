@@ -47,8 +47,6 @@ class Sp(pygame.sprite.Sprite):
         self.name = name
         self.image = self.load_image()
         self.rect = self.image.get_rect()
-        all_sprites.add(self)
-        self.cell = None
 
     def load_image(self, colorkey=None):
         fullname = os.path.join('data', self.name)
@@ -75,36 +73,79 @@ class main_board(Board):
             map1 = list(reader)  # импрот карты из csv файла
             map1[0][0] = map1[0][0][-1:]
             self.map = map1  # карта неподвижного
-            self.map_mas = [[None] * (self.width) for i in range(self.height)]  # массив неподвижых спрайтов
-            self.moving_map = [[None] * (self.width) for i in range(self.height)]  # карта подвижного
-            self.moving_map_mas = [[None] * (self.width) for i in range(self.height)]  # массив подвижых спрайтов
+            self.map_mas = [[None] * self.width for _ in range(self.height)]  # массив неподвижых спрайтов
+            self.moving_map = [[None] * self.width for _ in range(self.height)]  # карта подвижного
+            self.moving_map_mas = [[None] * self.width for _ in range(self.height)]  # массив подвижых спрайтов
             self.map_sp = pygame.sprite.Group()
             self.pieces_sp = pygame.sprite.Group()
             self.extra_sp = pygame.sprite.Group()
             self.focused = Sp('focused.png')
-            self.focused.cell = None
+            self.focused_cell = None
             self.dest = 0, 0
 
     def on_click(self, cell):
         self.extra_sp.empty()
-        self.focused.cell = cell
-        self.focused.rect.left = self.left + cell[0] * self.cell_size
-        self.focused.rect.top = self.top + cell[1] * self.cell_size
-        self.extra_sp.add(self.focused)
+        if self.moving_map[cell[1]][cell[0]] in ('11', '12'):
+            self.focused = Sp('focused_3.png')
+            self.focused.rect.left = self.left + (cell[0] - 1) * self.cell_size
+            self.focused.rect.top = self.top + cell[1] * self.cell_size
+            self.extra_sp.add(self.focused)
+        elif self.moving_map[cell[1]][cell[0]] in ('5', '6', '7', '8', '9', '10'):  # что можно выделять
+            self.focused = Sp('focused.png')
+            self.focused.rect.left = self.left + cell[0] * self.cell_size
+            self.focused.rect.top = self.top + cell[1] * self.cell_size
+            self.extra_sp.add(self.focused)
+        self.focused_cell = cell
 
     def render(self, screen):
         try:
-            if self.dest != (0, 0):
-                if (self.moving_map[self.focused.cell[1] + self.dest[1]][self.focused.cell[0] + self.dest[0]] == None and
-                        self.map[self.focused.cell[1] + self.dest[1]][self.focused.cell[0] + self.dest[0]] not in (
-                        '1', '2', '3')):
-                    new_cell = self.focused.cell[1] + self.dest[1], self.focused.cell[0] + self.dest[0]
-                    self.moving_map[self.focused.cell[1] + self.dest[1]][self.focused.cell[0] + self.dest[0]] = \
-                        self.moving_map[self.focused.cell[1]][self.focused.cell[0]]
-                    self.moving_map[self.focused.cell[1]][self.focused.cell[0]] = None
-                    self.on_click((new_cell[1],new_cell[0]))
-                    self.dest = 0, 0
-        except:
+            if self.dest != (0, 0): # если перемещение есть
+                if (self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] is None
+                        and self.map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] not in (
+                                '1', '2', '3', '5', '6') and 0 <= self.focused_cell[1] + self.dest[1] <= self.height and
+                        0 <= self.focused_cell[0] + self.dest[0] <= self.width and self.moving_map[self.focused_cell[1]
+                        ][self.focused_cell[0]] not in ('5', '6')):
+                    if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('11', '12'):
+                        if (self.dest[1] == 0 and self.map[self.focused_cell[1] + self.dest[1] * 2][self.focused_cell[0]
+                                + self.dest[0] * 2] not in (
+                                '1', '2', '3', '5', '6') and 0 <= self.focused_cell[1] +
+                                self.dest[1] * 2 <= self.height and 0 <= self.focused_cell[0] +
+                                self.dest[0] * 2 <= self.width and self.moving_map[self.focused_cell[1] + self.dest[1]][
+                                self.focused_cell[0] + self.dest[0] * 2] is None):
+                            new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
+                            self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
+                                                                                 self.dest[0]] = \
+                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                            self.on_click((new_cell[1], new_cell[0]))
+                            self.dest = 0, 0
+                    else:
+                        if not (self.dest[1] == 0 and (self.focused_cell[0] in (1, 9) or self.focused_cell[1] in (0, 10) # где-то здесь ошибка
+                            ) or (self.dest[0] == 0 and
+                                  (self.focused_cell[1] in (1, 9) or self.focused_cell[0] in (0, 10)))):
+                            if (self.dest[1] == 0 and (self.moving_map[self.focused_cell[1] + self.dest[1]][ # условия на то,что так не въезжает в поезд
+                                    self.focused_cell[0] + self.dest[0] * 2] not in ('11', '12') and
+                                    self.moving_map[self.focused_cell[1] + self.dest[1] * 2][
+                                    self.focused_cell[0] + self.dest[0]] not in ('11', '12')) or
+                                    (self.dest[0] == 0 and
+                                    self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] - 1]
+                                    not in ('11', '12') and self.moving_map[self.focused_cell[1] + self.dest[1]][
+                                    self.focused_cell[0] + 1] not in ('11', '12'))):
+                                new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
+                                self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
+                                    self.dest[0]] = self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
+                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                                self.on_click((new_cell[1], new_cell[0]))
+                                self.dest = 0, 0
+                        else:
+                            new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
+                            self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
+                                                                                 self.dest[0]] = \
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                            self.on_click((new_cell[1], new_cell[0]))
+                            self.dest = 0, 0
+        except IndexError:
             pass
         self.pieces_sp.empty()
         for y in range(self.height):
@@ -118,7 +159,7 @@ class main_board(Board):
                 elif n in ('11', '12'):
                     self.moving_map_mas[y][x] = Sp(f'{n}.png')
                     self.moving_map_mas[y][x].rect.left = self.left + (x - 1) * self.cell_size
-                    self.moving_map_mas[y][x].rect.top = self.top + (y) * self.cell_size
+                    self.moving_map_mas[y][x].rect.top = self.top + y * self.cell_size
                     self.pieces_sp.add(self.moving_map_mas[y][x])
         self.pieces_sp.draw(screen)
 
@@ -139,21 +180,7 @@ class main_board(Board):
                 self.map_sp.add(self.map_mas[y][x])
 
     def next_move(self):
-        '''tmp_board = copy.deepcopy(self.board)
-        for y in range(self.height):
-            for x in range(self.width):
-                s = 0
-                for dy in range(-1, 2):
-                    for dx in range(-1, 2):
-                        if x + dx < 0 or x + dx >= self.width or y + dy < 0 or y + dy >= self.height:
-                            continue
-                        s += self.board[y + dy][x + dx]
-                s -= self.board[y][x]
-                if s == 3:
-                    tmp_board[y][x] = 1
-                if s < 2 or s > 3:
-                    tmp_board[y][x] = 0
-        self.board = copy.deepcopy(tmp_board)'''
+        pass
 
 
 def main():
@@ -164,6 +191,7 @@ def main():
     board = main_board(11, 11, 100, 10, 70, 'map1.csv')
     board.set_view(300, 10, 70)
     board.first_render(screen)
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
     running = True
     time_on = False
     speed = 15
@@ -174,15 +202,16 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                board.dest = 0, 0
                 board.get_click(event.pos)
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+            if event.type == pygame.KEYDOWN and board.focused_cell:
+                if event.key == pygame.K_UP or event.key == pygame.K_w:
                     board.dest = 0, -1
-                if event.key == pygame.K_DOWN:
+                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     board.dest = 0, 1
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     board.dest = -1, 0
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     board.dest = 1, 0
         screen.fill((0, 0, 0))
         pygame.draw.rect(screen, "#d55800", (
@@ -195,7 +224,7 @@ def main():
                 board.next_move()
             ticks = 0
         pygame.display.flip()
-        clock.tick(100)
+        clock.tick(10)
         ticks += 1
     pygame.quit()
 
