@@ -158,7 +158,7 @@ class main_board(Board):
 
 def main():
     pygame.init()
-    pygame.display.set_caption('игра')
+    pygame.display.set_caption('Игра')
     size = width, height = 1920 * 3 / 4, 1080 * 3 / 4
     screen = pygame.display.set_mode(size)
     board = main_board(11, 11, 100, 10, 70, 'map1.csv')
