@@ -71,10 +71,11 @@ class main_board(Board):
         with open(f'data/{f_name}', encoding="utf8") as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
             map1 = list(reader)  # импрот карты из csv файла
-            map1[0][0] = map1[0][0][-1:]
+            #map1[0][0] = map1[0][0][-1:]
+            map1 = [[map1[j][i].split() for i in range(len(map1))] for j in range(len(map1))]
             self.map = map1  # карта неподвижного
             self.map_mas = [[None] * self.width for _ in range(self.height)]  # массив неподвижых спрайтов
-            self.moving_map = [[None] * self.width for _ in range(self.height)]  # карта подвижного
+            self.moving_map = [[[None]] * self.width for _ in range(self.height)]  # карта подвижного
             self.moving_map_mas = [[None] * self.width for _ in range(self.height)]  # массив подвижых спрайтов
             self.map_sp = pygame.sprite.Group()
             self.pieces_sp = pygame.sprite.Group()
@@ -82,15 +83,16 @@ class main_board(Board):
             self.focused = Sp('focused.png')
             self.focused_cell = None
             self.dest = 0, 0
+            print(*map1, sep='\n')
 
     def on_click(self, cell):
         self.extra_sp.empty()
-        if self.moving_map[cell[1]][cell[0]] in ('11', '12'):
+        if self.moving_map[cell[1]][cell[0]][0] in ('11', '12'):
             self.focused = Sp('focused_3.png')
             self.focused.rect.left = self.left + (cell[0] - 1) * self.cell_size
             self.focused.rect.top = self.top + cell[1] * self.cell_size
             self.extra_sp.add(self.focused)
-        elif self.moving_map[cell[1]][cell[0]] in ('5', '6', '7', '8', '9', '10'):  # что можно выделять
+        elif self.moving_map[cell[1]][cell[0]][0] in ('5', '6', '7', '8', '9', '10'):  # что можно выделять
             self.focused = Sp('focused.png')
             self.focused.rect.left = self.left + cell[0] * self.cell_size
             self.focused.rect.top = self.top + cell[1] * self.cell_size
@@ -100,23 +102,23 @@ class main_board(Board):
     def render(self, screen):
         try:
             if self.dest != (0, 0): # если перемещение есть
-                if (self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] is None
-                        and self.map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] not in (
+                if (self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]][0] is None
+                        and self.map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]][0] not in (
                                 '1', '2', '3', '5', '6') and 0 <= self.focused_cell[1] + self.dest[1] <= self.height and
                         0 <= self.focused_cell[0] + self.dest[0] <= self.width and self.moving_map[self.focused_cell[1]
-                        ][self.focused_cell[0]] not in ('5', '6')):
-                    if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('11', '12'):
+                        ][self.focused_cell[0]][0] not in ('5', '6')):
+                    if self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0] in ('11', '12'):
                         if (self.dest[1] == 0 and self.map[self.focused_cell[1] + self.dest[1] * 2][self.focused_cell[0]
-                                + self.dest[0] * 2] not in (
+                                + self.dest[0] * 2][0] not in (
                                 '1', '2', '3', '5', '6') and 0 <= self.focused_cell[1] +
                                 self.dest[1] * 2 <= self.height and 0 <= self.focused_cell[0] +
                                 self.dest[0] * 2 <= self.width and self.moving_map[self.focused_cell[1] + self.dest[1]][
-                                self.focused_cell[0] + self.dest[0] * 2] is None):
+                                self.focused_cell[0] + self.dest[0] * 2][0] is None):
                             new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
                             self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
-                                                                                 self.dest[0]] = \
-                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
-                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                                                                                 self.dest[0]][0] = \
+                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0]
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0] = [None]
                             self.on_click((new_cell[1], new_cell[0]))
                             self.dest = 0, 0
                     else:
@@ -124,25 +126,25 @@ class main_board(Board):
                             ) or (self.dest[0] == 0 and
                                   (self.focused_cell[1] in (1, 9) or self.focused_cell[0] in (0, 10)))):
                             if (self.dest[1] == 0 and (self.moving_map[self.focused_cell[1] + self.dest[1]][ # условия на то,что так не въезжает в поезд
-                                    self.focused_cell[0] + self.dest[0] * 2] not in ('11', '12') and
+                                    self.focused_cell[0] + self.dest[0] * 2][0] not in ('11', '12') and
                                     self.moving_map[self.focused_cell[1] + self.dest[1] * 2][
-                                    self.focused_cell[0] + self.dest[0]] not in ('11', '12')) or
+                                    self.focused_cell[0] + self.dest[0]][0] not in ('11', '12')) or
                                     (self.dest[0] == 0 and
-                                    self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] - 1]
+                                    self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] - 1][0]
                                     not in ('11', '12') and self.moving_map[self.focused_cell[1] + self.dest[1]][
-                                    self.focused_cell[0] + 1] not in ('11', '12'))):
+                                    self.focused_cell[0] + 1][0] not in ('11', '12'))):
                                 new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
                                 self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
-                                    self.dest[0]] = self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
-                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                                    self.dest[0]][0] = self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0]
+                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0] = [None]
                                 self.on_click((new_cell[1], new_cell[0]))
                                 self.dest = 0, 0
                         else:
                             new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
                             self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
-                                                                                 self.dest[0]] = \
-                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
-                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                                                                                 self.dest[0]][0] = \
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0]
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]][0] = [None]
                             self.on_click((new_cell[1], new_cell[0]))
                             self.dest = 0, 0
         except IndexError:
@@ -150,7 +152,7 @@ class main_board(Board):
         self.pieces_sp.empty()
         for y in range(self.height):
             for x in range(self.width):
-                n = self.moving_map[y][x]
+                n = self.moving_map[y][x][0]
                 if n and n not in ('11', '12'):
                     self.moving_map_mas[y][x] = Sp(f'{n}.png')
                     self.moving_map_mas[y][x].rect.left = self.left + x * self.cell_size
@@ -166,14 +168,14 @@ class main_board(Board):
     def first_render(self, screen):
         for y in range(self.height):
             for x in range(self.width):
-                n = self.map[y][x]
+                n = self.map[y][x][0]
                 if n == '12' or n == '11':
-                    self.moving_map[y][x] = n
+                    self.moving_map[y][x] = self.map[y][x]
                     n = '11_1'
                 if int(n) > 4 and n != '11_1':  # если подвижый элемент, нарисуй землю
-                    self.moving_map[y][x] = n
+                    self.moving_map[y][x] = self.map[y][x]
                     n = '0'
-                self.map[y][x] = n
+                #self.map[y][x][0] = n #something wrong
                 self.map_mas[y][x] = Sp(f'{n}.png')  # создание спрайта с номером из csv-карты
                 self.map_mas[y][x].rect.left = self.left + x * self.cell_size
                 self.map_mas[y][x].rect.top = self.top + y * self.cell_size
@@ -204,6 +206,7 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 board.dest = 0, 0
                 board.get_click(event.pos)
+                print(*board.moving_map, sep='\n')
             if event.type == pygame.KEYDOWN and board.focused_cell:
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
                     board.dest = 0, -1
