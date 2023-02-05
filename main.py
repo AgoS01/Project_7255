@@ -83,6 +83,10 @@ class main_board(Board):
             self.focused_cell = [0, 10]
             self.dest = 0, 0
             self.rot = 0
+            self.hit = -1, -1
+            self.bull_dest = 0, 0
+            self.bullet_ex = 0
+            self.bullet_speed = 20
             self.rot_mas = {'7':180,'8':0,'9':270,'10':90,'5':270,'6':90}
 
     def on_click(self, cell):
@@ -154,10 +158,62 @@ class main_board(Board):
         except IndexError:
             pass
 
+    def next_move(self):
+        pass
+
+    def shoot(self):
+        if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('5', '6', '7', '8'):
+            if self.bullet_ex:
+                self.extra_sp.remove(self.bullet)
+                self.bullet_ex = 0
+            tmp_dest = self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]]
+            self.bullet_ex = 1
+            if tmp_dest == 0:
+                self.bull_dest = 0, -1
+            elif tmp_dest == 90:
+                self.bull_dest = -1, 0
+            elif tmp_dest == 270:
+                self.bull_dest = 1, 0
+            elif tmp_dest == 180:
+                self.bull_dest = 0, 1
+            self.bullet = Sp('bullet.png')
+            self.bullet.rect.left = self.left + self.focused_cell[0] * self.cell_size
+            self.bullet.rect.top = self.top + self.focused_cell[1] * self.cell_size
+            self.bullet.image = pygame.transform.rotate(self.bullet.image, tmp_dest)
+            self.extra_sp.add(self.bullet)
+
     def render(self, screen):
+        self.screen = screen
         self.move_ability()
         self.dest = 0, 0
         self.pieces_sp.empty()
+        if self.hit[0] != -1:
+            self.explosion = Sp('boom.png')
+            self.explosion.rect.left = self.left + self.hit[0] * self.cell_size - 10
+            self.explosion.rect.top = self.top + self.hit[1] * self.cell_size - 10
+            self.extra_sp.add(self.explosion)
+        if self.bullet_ex:
+            self.bullet.rect.left += self.bullet_speed * self.bull_dest[0]
+            self.bullet.rect.top += self.bullet_speed * self.bull_dest[1]
+            if self.top > self.bullet.rect.top or self.bullet.rect.top > self.top + (self.height - 1) * \
+                    self.cell_size or 0 + self.left > self.bullet.rect.left or self.bullet.rect.left >\
+                    (self.width - 1) * self.cell_size + self.left:
+                self.extra_sp.remove(self.bullet)
+                self.bullet_ex = 0
+            tmp_cell = self.get_cell((self.bullet.rect.left, self.bullet.rect.top))
+            if self.bullet_ex:
+                if self.moving_map[tmp_cell[1]][tmp_cell[0]] in ('5', '6', '7', '8', '11.1', '11.2', '11.3',
+                        '12.1', '12.2', '12.3', '9', '10') and self.moving_map[tmp_cell[1]][tmp_cell[0]] !=\
+                        self.moving_map[self.focused_cell[1]][self.focused_cell[0]]:
+                    self.extra_sp.remove(self.bullet)
+                    self.bullet_ex = 0
+                    self.hit = tmp_cell
+                    print(self.hit)
+                if self.map[tmp_cell[1]][tmp_cell[0]] in ('1', '2'):
+                    self.extra_sp.remove(self.bullet)
+                    self.bullet_ex = 0
+
+
         for y in range(self.height):
             for x in range(self.width):
                 n = self.moving_map[y][x]
@@ -187,9 +243,6 @@ class main_board(Board):
                 self.map_mas[y][x].rect.left = self.left + x * self.cell_size
                 self.map_mas[y][x].rect.top = self.top + y * self.cell_size
                 self.map_sp.add(self.map_mas[y][x])
-
-    def next_move(self):
-        pass
 
 
 def main():
@@ -227,6 +280,9 @@ def main():
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                     board.dest = 0, 0
                     board.rot = -90
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    board.shoot()
         screen.fill((0, 0, 0))
         pygame.draw.rect(screen, "#d55800", (
             board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
@@ -238,7 +294,7 @@ def main():
                 board.next_move()
             ticks = 0
         pygame.display.flip()
-        clock.tick(10)
+        clock.tick(60)
         ticks += 1
     pygame.quit()
 
