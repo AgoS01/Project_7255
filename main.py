@@ -84,6 +84,7 @@ class main_board(Board):
             self.dest = 0, 0
             self.rot = 0
             self.hit = -1, -1
+            self.c = -1
             self.bull_dest = 0, 0
             self.bullet_ex = 0
             self.bullet_speed = 20
@@ -187,11 +188,22 @@ class main_board(Board):
         self.move_ability()
         self.dest = 0, 0
         self.pieces_sp.empty()
+        if self.c:
+            self.c -= 1
+        else:
+            self.c = -1
+            self.extra_sp.remove(self.explosion)
         if self.hit[0] != -1:
+            temp_pos = self.moving_map[self.hit[1]][self.hit[0]]
             self.explosion = Sp('boom.png')
             self.explosion.rect.left = self.left + self.hit[0] * self.cell_size - 10
             self.explosion.rect.top = self.top + self.hit[1] * self.cell_size - 10
             self.extra_sp.add(self.explosion)
+            if temp_pos in ('5', '6', '7', '8', '9', '10'):
+                self.moving_map[self.hit[1]][self.hit[0]] = None
+                self.rot_mas.pop(temp_pos)
+            self.hit = -1, -1
+            self.c = 10
         if self.bullet_ex:
             self.bullet.rect.left += self.bullet_speed * self.bull_dest[0]
             self.bullet.rect.top += self.bullet_speed * self.bull_dest[1]
@@ -200,7 +212,7 @@ class main_board(Board):
                     (self.width - 1) * self.cell_size + self.left:
                 self.extra_sp.remove(self.bullet)
                 self.bullet_ex = 0
-            tmp_cell = self.get_cell((self.bullet.rect.left, self.bullet.rect.top))
+            tmp_cell = self.get_cell((self.bullet.rect.left + 2, self.bullet.rect.top + 2))
             if self.bullet_ex:
                 if self.moving_map[tmp_cell[1]][tmp_cell[0]] in ('5', '6', '7', '8', '11.1', '11.2', '11.3',
                         '12.1', '12.2', '12.3', '9', '10') and self.moving_map[tmp_cell[1]][tmp_cell[0]] !=\
