@@ -87,7 +87,7 @@ class main_board(Board):
             self.c = -1
             self.bull_dest = 0, 0
             self.bullet_ex = 0
-            self.bullet_speed = 20
+            self.bullet_speed = 30
             self.rot_mas = {'7':180,'8':0,'9':270,'10':90,'5':270,'6':90}
 
     def on_click(self, cell):
@@ -163,7 +163,7 @@ class main_board(Board):
         pass
 
     def shoot(self):
-        if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('5', '6', '7', '8'):
+        if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('5', '6', '7', '8'): # what can shoot
             if self.bullet_ex:
                 self.extra_sp.remove(self.bullet)
                 self.bullet_ex = 0
@@ -188,13 +188,14 @@ class main_board(Board):
         self.move_ability()
         self.dest = 0, 0
         self.pieces_sp.empty()
-        if self.c:
+        if self.c: #counter
             self.c -= 1
         else:
             self.c = -1
             self.extra_sp.remove(self.explosion)
         if self.hit[0] != -1:
             temp_pos = self.moving_map[self.hit[1]][self.hit[0]]
+            temp_pos2 = self.map[self.hit[1]][self.hit[0]]
             self.explosion = Sp('boom.png')
             self.explosion.rect.left = self.left + self.hit[0] * self.cell_size - 10
             self.explosion.rect.top = self.top + self.hit[1] * self.cell_size - 10
@@ -202,6 +203,9 @@ class main_board(Board):
             if temp_pos in ('5', '6', '7', '8', '9', '10'):
                 self.moving_map[self.hit[1]][self.hit[0]] = None
                 self.rot_mas.pop(temp_pos)
+            if temp_pos2 == '1':
+                self.map[self.hit[1]][self.hit[0]] = '0'
+                print(1)
             self.hit = -1, -1
             self.c = 10
         if self.bullet_ex:
@@ -212,18 +216,21 @@ class main_board(Board):
                     (self.width - 1) * self.cell_size + self.left:
                 self.extra_sp.remove(self.bullet)
                 self.bullet_ex = 0
-            tmp_cell = self.get_cell((self.bullet.rect.left + 2, self.bullet.rect.top + 2))
+            tmp_cell = self.get_cell((self.bullet.rect.left + 30, self.bullet.rect.top + 30))
             if self.bullet_ex:
                 if self.moving_map[tmp_cell[1]][tmp_cell[0]] in ('5', '6', '7', '8', '11.1', '11.2', '11.3',
-                        '12.1', '12.2', '12.3', '9', '10') and self.moving_map[tmp_cell[1]][tmp_cell[0]] !=\
+                        '12.1', '12.2', '12.3', '9', '10', '1', '2') and self.moving_map[tmp_cell[1]][tmp_cell[0]] !=\
                         self.moving_map[self.focused_cell[1]][self.focused_cell[0]]:
                     self.extra_sp.remove(self.bullet)
                     self.bullet_ex = 0
                     self.hit = tmp_cell
                     print(self.hit)
-                if self.map[tmp_cell[1]][tmp_cell[0]] in ('1', '2'):
+                if self.map[tmp_cell[1]][tmp_cell[0]] in ('1', '2') and self.moving_map[tmp_cell[1]][tmp_cell[0]] !=\
+                        self.moving_map[self.focused_cell[1]][self.focused_cell[0]]:
                     self.extra_sp.remove(self.bullet)
                     self.bullet_ex = 0
+                    self.hit = tmp_cell
+                    print(self.hit)
 
 
         for y in range(self.height):
@@ -240,6 +247,7 @@ class main_board(Board):
         self.pieces_sp.draw(screen)
 
     def first_render(self, screen):
+        self.map_sp.empty()
         for y in range(self.height):
             for x in range(self.width):
                 n = self.map[y][x]
@@ -259,10 +267,11 @@ class main_board(Board):
 
 def main():
     pygame.init()
+    mapp = 'map2.csv'
     pygame.display.set_caption('Игра')
     size = width, height = 1920 * 3 / 4, 1080 * 3 / 4
     screen = pygame.display.set_mode(size)
-    board = main_board(11, 11, 100, 10, 70, 'map1.csv')
+    board = main_board(11, 11, 100, 10, 70, mapp)
     board.set_view(300, 10, 70)
     board.first_render(screen)
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -298,6 +307,7 @@ def main():
         screen.fill((0, 0, 0))
         pygame.draw.rect(screen, "#d55800", (
             board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
+        board.first_render(screen)
         board.map_sp.draw(screen)  # создание карты
         board.render(screen)
         board.extra_sp.draw(screen)
