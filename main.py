@@ -202,6 +202,12 @@ class main_board(Board):
             self.bullet.image = pygame.transform.rotate(self.bullet.image, tmp_dest)
             self.extra_sp.add(self.bullet)
 
+    def endgame(self):
+        if not ('7' in [j for i in self.moving_map for j in i] and '9' in [j for i in self.moving_map for j in i]):
+            print('green won')
+        if not ('8' in [j for i in self.moving_map for j in i] and '10' in [j for i in self.moving_map for j in i]):
+            print('red won')
+
     def render(self, screen):
         self.screen = screen
         self.move_ability()
@@ -308,25 +314,26 @@ def main():
                 board.dest = 0, 0
                 board.rot = 0
                 board.get_click(event.pos)
-            if event.type == pygame.KEYDOWN and board.focused_cell:
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    board.dest = 0, -1
-                    move_counter -= 1
-                    board.rot = 0
-                if event.key == pygame.K_DOWN or event.key == pygame.K_s:
-                    board.dest = 0, 1
-                    move_counter -= 1
-                    board.rot = 0
-                if event.key == pygame.K_LEFT or event.key == pygame.K_a:
-                    board.dest = 0, 0
-                    board.rot = 90
-                if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    board.dest = 0, 0
-                    board.rot = -90
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    move_counter -= 1
-                    board.shoot()
+            if board.chosen:
+                if event.type == pygame.KEYDOWN and board.focused_cell:
+                    if event.key == pygame.K_UP or event.key == pygame.K_w:
+                        board.dest = 0, -1
+                        move_counter -= 1
+                        board.rot = 0
+                    if event.key == pygame.K_DOWN or event.key == pygame.K_s:
+                        board.dest = 0, 1
+                        move_counter -= 1
+                        board.rot = 0
+                    if event.key == pygame.K_LEFT or event.key == pygame.K_a:
+                        board.dest = 0, 0
+                        board.rot = 90
+                    if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
+                        board.dest = 0, 0
+                        board.rot = -90
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        move_counter -= 1
+                        board.shoot()
         screen.fill((0, 0, 0))
         pygame.draw.rect(screen, "#d55800", (
             board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
@@ -345,6 +352,7 @@ def main():
                 board.on_click(tmp_chosen)
             else:
                 last_chosen = board.focused_cell
+        board.endgame()
         if ticks >= speed:
             if time_on:
                 board.next_move()
