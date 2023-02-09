@@ -80,15 +80,45 @@ class main_board(Board):
             self.pieces_sp = pygame.sprite.Group()
             self.extra_sp = pygame.sprite.Group()
             self.focused = Sp('focused.png')
-            self.focused_cell = [0, 10]
+            self.focused_cell = [-1, -1]
             self.dest = 0, 0
             self.rot = 0
             self.hit = -1, -1
             self.c = -1
+            self.chosen = 0
             self.bull_dest = 0, 0
             self.bullet_ex = 0
+            self.player = 0
             self.bullet_speed = 30
             self.rot_mas = {'7':180,'8':0,'9':270,'10':90,'5':270,'6':90}
+
+    def player_move(self, cell):
+        if self.player == 0:
+            if self.moving_map[cell[1]][cell[0]] == '12.2':
+                self.focused = Sp('focused_3.png')
+                self.chosen = 1
+                self.focused.rect.left = self.left + (cell[0] - 1) * self.cell_size
+                self.focused.rect.top = self.top + cell[1] * self.cell_size
+                self.extra_sp.add(self.focused)
+            elif self.moving_map[cell[1]][cell[0]] in ('6', '8', '10'):  # что можно выделять
+                self.focused = Sp('focused.png')
+                self.focused.rect.left = self.left + cell[0] * self.cell_size
+                self.focused.rect.top = self.top + cell[1] * self.cell_size
+                self.extra_sp.add(self.focused)
+                self.chosen = 1
+        elif self.player == 1:
+            if self.moving_map[cell[1]][cell[0]] == '11.2':
+                self.focused = Sp('focused_3.png')
+                self.focused.rect.left = self.left + (cell[0] - 1) * self.cell_size
+                self.focused.rect.top = self.top + cell[1] * self.cell_size
+                self.extra_sp.add(self.focused)
+                self.chosen = 1
+            elif self.moving_map[cell[1]][cell[0]] in ('5', '7', '9'):  # что можно выделять
+                self.focused = Sp('focused.png')
+                self.focused.rect.left = self.left + cell[0] * self.cell_size
+                self.focused.rect.top = self.top + cell[1] * self.cell_size
+                self.extra_sp.add(self.focused)
+                self.chosen = 1
 
     def on_click(self, cell):
         self.extra_sp.empty()
@@ -98,72 +128,61 @@ class main_board(Board):
                 self.on_click((cell[0] + 1, cell[1]))
             if '.3' in self.moving_map[cell[1]][cell[0]]:
                 self.on_click((cell[0] - 1, cell[1]))
-            elif self.moving_map[cell[1]][cell[0]] in ('11.2', '12.2'):
-                self.focused = Sp('focused_3.png')
-                self.focused.rect.left = self.left + (cell[0] - 1) * self.cell_size
-                self.focused.rect.top = self.top + cell[1] * self.cell_size
-                self.extra_sp.add(self.focused)
-            elif self.moving_map[cell[1]][cell[0]] in ('5', '6', '7', '8', '9', '10'):  # что можно выделять
-                self.focused = Sp('focused.png')
-                self.focused.rect.left = self.left + cell[0] * self.cell_size
-                self.focused.rect.top = self.top + cell[1] * self.cell_size
-                self.extra_sp.add(self.focused)
+            self.player_move(cell)
 
     def move_ability(self):
-        try:
-            # условия поезда
-            if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] and \
-                    self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('11.2', '12.2'):
+        if self.chosen:
+            try:
+                # условия поезда
+                if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] and \
+                        self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('11.2', '12.2'):
 
-                self.dest = (-self.dest[1], self.dest[0])
+                    self.dest = (-self.dest[1], self.dest[0])
 
-                if (self.dest[1] == 0 and self.map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] * 2] not
-                        in ('1', '2', '3', '5', '6') and 0 <= self.focused_cell[0] + self.dest[0] * 2 <=
-                    self.width and self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] * 2] is
-                        None):
-                    new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
-                    self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] + 1],\
-                        self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0]],\
-                        self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] - 1] = \
-                        self.moving_map[self.focused_cell[1]][self.focused_cell[0] + 1],\
-                        self.moving_map[self.focused_cell[1]][self.focused_cell[0]], \
-                        self.moving_map[self.focused_cell[1]][self.focused_cell[0] - 1]
-                    self.moving_map[self.focused_cell[1]][self.focused_cell[0] - self.dest[0]] = None
-                    self.on_click((new_cell[1], new_cell[0]))
-                    self.dest = 0, 0
-            #условия других движущихся об.
-            elif self.rot and self.moving_map[self.focused_cell[1]][self.focused_cell[0]] not in ('11.2', '12.2') :
-                self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] = \
-                    (self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] + self.rot) % 360
-                self.rot = 0
-            elif self.dest != (0, 0): # если перемещение есть
-                if self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] == 90:
-                    self.dest = (self.dest[1], self.dest[0])
-                elif self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] == 270:
-                    self.dest = (-self.dest[1], -self.dest[0])
-                elif self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] == 180:
-                    self.dest = (-self.dest[0], -self.dest[1])
-                if (self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] is None
-                        and self.map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] not in (
-                                '1', '2', '3', '5', '6') and 0 <= self.focused_cell[1] + self.dest[1] <= self.height - 1
-                        and 0 <= self.focused_cell[0] + self.dest[0] <= self.width - 1 and self.moving_map[
-                            self.focused_cell[1]][self.focused_cell[0]] not in ('5', '6')):
-                            new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
-                            self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
-                                                                                 self.dest[0]] = \
-                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
-                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
-                            self.on_click((new_cell[1], new_cell[0]))
+                    if (self.dest[1] == 0 and self.map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] * 2] not
+                            in ('1', '2', '3', '5', '6') and 0 <= self.focused_cell[0] + self.dest[0] * 2 <=
+                        self.width and self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] * 2] is
+                            None):
+                        new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
+                        self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] + 1],\
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0]],\
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0] + self.dest[0] - 1] = \
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0] + 1],\
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0]], \
+                            self.moving_map[self.focused_cell[1]][self.focused_cell[0] - 1]
+                        self.moving_map[self.focused_cell[1]][self.focused_cell[0] - self.dest[0]] = None
+                        self.on_click((new_cell[1], new_cell[0]))
+                        self.dest = 0, 0
+                #условия других движущихся об.
+                elif self.rot and self.moving_map[self.focused_cell[1]][self.focused_cell[0]] not in ('11.2', '12.2') :
+                    self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] = \
+                        (self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] + self.rot) % 360
+                    self.rot = 0
+                elif self.dest != (0, 0): # если перемещение есть
+                    if self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] == 90:
+                        self.dest = (self.dest[1], self.dest[0])
+                    elif self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] == 270:
+                        self.dest = (-self.dest[1], -self.dest[0])
+                    elif self.rot_mas[self.moving_map[self.focused_cell[1]][self.focused_cell[0]]] == 180:
+                        self.dest = (-self.dest[0], -self.dest[1])
+                    if (self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] is None
+                            and self.map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + self.dest[0]] not in (
+                                    '1', '2', '3', '5', '6') and 0 <= self.focused_cell[1] + self.dest[1] <= self.height - 1
+                            and 0 <= self.focused_cell[0] + self.dest[0] <= self.width - 1 and self.moving_map[
+                                self.focused_cell[1]][self.focused_cell[0]] not in ('5', '6')):
+                                new_cell = self.focused_cell[1] + self.dest[1], self.focused_cell[0] + self.dest[0]
+                                self.moving_map[self.focused_cell[1] + self.dest[1]][self.focused_cell[0] + \
+                                                                                     self.dest[0]] = \
+                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]]
+                                self.moving_map[self.focused_cell[1]][self.focused_cell[0]] = None
+                                self.on_click((new_cell[1], new_cell[0]))
 
-            self.dest = 0, 0
-        except IndexError:
-            pass
-
-    def next_move(self):
-        pass
+                self.dest = 0, 0
+            except IndexError:
+                pass
 
     def shoot(self):
-        if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('5', '6', '7', '8'): # what can shoot
+        if self.moving_map[self.focused_cell[1]][self.focused_cell[0]] in ('5', '6', '7', '8') and self.chosen: # what can shoot
             if self.bullet_ex:
                 self.extra_sp.remove(self.bullet)
                 self.bullet_ex = 0
@@ -188,7 +207,7 @@ class main_board(Board):
         self.move_ability()
         self.dest = 0, 0
         self.pieces_sp.empty()
-        if self.c: #counter
+        if self.c: #counter for explosion existance time
             self.c -= 1
         else:
             self.c = -1
@@ -205,7 +224,6 @@ class main_board(Board):
                 self.rot_mas.pop(temp_pos)
             if temp_pos2 == '1':
                 self.map[self.hit[1]][self.hit[0]] = '0'
-                print(1)
             self.hit = -1, -1
             self.c = 10
         if self.bullet_ex:
@@ -224,13 +242,11 @@ class main_board(Board):
                     self.extra_sp.remove(self.bullet)
                     self.bullet_ex = 0
                     self.hit = tmp_cell
-                    print(self.hit)
                 if self.map[tmp_cell[1]][tmp_cell[0]] in ('1', '2') and self.moving_map[tmp_cell[1]][tmp_cell[0]] !=\
                         self.moving_map[self.focused_cell[1]][self.focused_cell[0]]:
                     self.extra_sp.remove(self.bullet)
                     self.bullet_ex = 0
                     self.hit = tmp_cell
-                    print(self.hit)
 
 
         for y in range(self.height):
@@ -267,7 +283,7 @@ class main_board(Board):
 
 def main():
     pygame.init()
-    mapp = 'map2.csv'
+    mapp = 'map1.csv'
     pygame.display.set_caption('Игра')
     size = width, height = 1920 * 3 / 4, 1080 * 3 / 4
     screen = pygame.display.set_mode(size)
@@ -279,6 +295,10 @@ def main():
     time_on = False
     speed = 15
     ticks = 0
+    last_chosen = None
+    default_mc = 3 # кол-во ходов по условию
+    move_counter = default_mc
+    board.player = 0
     clock = pygame.time.Clock()
     while running:
         for event in pygame.event.get():
@@ -291,9 +311,11 @@ def main():
             if event.type == pygame.KEYDOWN and board.focused_cell:
                 if event.key == pygame.K_UP or event.key == pygame.K_w:
                     board.dest = 0, -1
+                    move_counter -= 1
                     board.rot = 0
                 if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     board.dest = 0, 1
+                    move_counter -= 1
                     board.rot = 0
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     board.dest = 0, 0
@@ -303,6 +325,7 @@ def main():
                     board.rot = -90
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    move_counter -= 1
                     board.shoot()
         screen.fill((0, 0, 0))
         pygame.draw.rect(screen, "#d55800", (
@@ -311,6 +334,17 @@ def main():
         board.map_sp.draw(screen)  # создание карты
         board.render(screen)
         board.extra_sp.draw(screen)
+        if move_counter == 0:
+            board.player = (board.player + 1) % 2
+            move_counter = default_mc
+            board.chosen = 0
+            board.focused.kill()
+            if last_chosen:
+                tmp_chosen = last_chosen
+                last_chosen = board.focused_cell
+                board.on_click(tmp_chosen)
+            else:
+                last_chosen = board.focused_cell
         if ticks >= speed:
             if time_on:
                 board.next_move()
