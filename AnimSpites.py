@@ -1,6 +1,10 @@
 import pygame
 import os
 
+class Font:
+    def new_font(size):
+        return pygame.font.Font('data/font2.ttf', size)
+
 
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
