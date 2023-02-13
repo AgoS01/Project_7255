@@ -52,22 +52,10 @@ class Game:
                             move_counter -= 1
                             sht_snd.play()
                             board.shoot()
-                        if event.key == pygame.K_ESCAPE:
-                            pygame.quit()
-                            os.system('python backtomenu.py')
-            if move_counter == 0:
-                if board.bullet_ex == 0:
-                    board.player = (board.player + 1) % 2
-                    move_counter = default_mc
-                    board.chosen = 0
-                    board.focused.kill()
-                    if last_chosen:
-                        tmp_chosen = last_chosen
-                        last_chosen = board.focused_cell
-                        board.on_click(tmp_chosen)
-                    else:
-                        last_chosen = board.focused_cell
-
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        os.system('python backtomenu.py')
             screen.fill((0, 0, 0))
             pygame.draw.rect(screen, "#d55800", (
                 board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
@@ -98,16 +86,17 @@ class Game:
             ST_RECT = ST_TEXT.get_rect(center=(130, 140))
             screen.blit(ST_TEXT, ST_RECT)
             if move_counter == 0:
-                board.player = (board.player + 1) % 2
-                move_counter = default_mc
-                board.chosen = 0
-                board.focused.kill()
-                if last_chosen:
-                    tmp_chosen = last_chosen
-                    last_chosen = board.focused_cell
-                    board.on_click(tmp_chosen)
-                else:
-                    last_chosen = board.focused_cell
+                if board.bullet_ex == 0:
+                    board.player = (board.player + 1) % 2
+                    move_counter = default_mc
+                    board.chosen = 0
+                    board.focused.kill()
+                    if last_chosen:
+                        tmp_chosen = last_chosen
+                        last_chosen = board.focused_cell
+                        board.on_click(tmp_chosen)
+                    else:
+                        last_chosen = board.focused_cell
             board.endgame()
             if ticks >= speed:
                 if time_on:

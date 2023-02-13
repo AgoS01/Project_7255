@@ -30,7 +30,7 @@ class sandbox_board(Board):
             self.c = -1
             self.bull_dest = 0, 0
             self.bullet_ex = 0
-            self.bullet_speed = 30
+            self.bullet_speed = 50
             self.rot_mas = {'7': 180, '8': 0, '9': 270, '10': 90, '5': 270,
                             '6': 90}
 
