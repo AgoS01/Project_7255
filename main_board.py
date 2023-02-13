@@ -149,9 +149,9 @@ class MainBoard(Board):
 
     def endgame(self):
         if not ('7' in [j for i in self.moving_map for j in i] and '9' in [j for i in self.moving_map for j in i]):
-            print('green won')
+            victory.gr_win()
         if not ('8' in [j for i in self.moving_map for j in i] and '10' in [j for i in self.moving_map for j in i]):
-            print('red won')
+            victory.rd_win()
 
     def render(self, screen):
         self.screen = screen
@@ -164,6 +164,9 @@ class MainBoard(Board):
             self.c = -1
             self.extra_sp.remove(self.explosion)
         if self.hit[0] != -1:
+            pygame.mixer.init()
+            exl_snd = pygame.mixer.Sound('data/explode.mp3')
+            exl_snd.play()
             temp_pos = self.moving_map[self.hit[1]][self.hit[0]]
             temp_pos2 = self.map[self.hit[1]][self.hit[0]]
             self.explosion = Sp('boom.png')

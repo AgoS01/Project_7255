@@ -1,5 +1,6 @@
 import os
 import pygame
+import sys
 
 
 class Sp(pygame.sprite.Sprite):
@@ -24,3 +25,4 @@ class Sp(pygame.sprite.Sprite):
         else:
             image = image.convert_alpha()
         return image
+
