@@ -59,16 +59,17 @@ class Game:
             board.render(screen)
             board.extra_sp.draw(screen)
             if move_counter == 0:
-                board.player = (board.player + 1) % 2
-                move_counter = default_mc
-                board.chosen = 0
-                board.focused.kill()
-                if last_chosen:
-                    tmp_chosen = last_chosen
-                    last_chosen = board.focused_cell
-                    board.on_click(tmp_chosen)
-                else:
-                    last_chosen = board.focused_cell
+                if board.bullet_ex == 0:
+                    board.player = (board.player + 1) % 2
+                    move_counter = default_mc
+                    board.chosen = 0
+                    board.focused.kill()
+                    if last_chosen:
+                        tmp_chosen = last_chosen
+                        last_chosen = board.focused_cell
+                        board.on_click(tmp_chosen)
+                    else:
+                        last_chosen = board.focused_cell
             board.endgame()
             if ticks >= speed:
                 if time_on:
