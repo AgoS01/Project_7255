@@ -2,7 +2,7 @@ from board import Board
 import pygame
 import csv
 from sprites import Sp
-
+from game_victory import victory
 
 class MainBoard(Board):
     def __init__(self, width, height, left, top, cell_size, f_name):

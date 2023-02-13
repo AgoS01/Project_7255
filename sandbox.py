@@ -261,7 +261,7 @@ class sandbox_board(Board):
 class Sandbox:
     def sandbox(mapp):
         pygame.init()
-        pygame.display.set_caption('Игра')
+        pygame.display.set_caption('Project 7255')
         size = width, height = 1920 * 3 / 4, 1080 * 3 / 4
         screen = pygame.display.set_mode(size)
         board = sandbox_board(11, 11, 100, 10, 70, mapp)
@@ -296,7 +296,13 @@ class Sandbox:
                         board.rot = -90
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
+                        pygame.mixer.init()
+                        sht_snd = pygame.mixer.Sound('data/vystrel-tanka.mp3')
+                        sht_snd.play()
                         board.shoot()
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        os.system('python backtomenu.py')
             screen.fill((0, 0, 0))
             pygame.draw.rect(screen, "#d55800", (
                 board.left, board.top, board.cell_size * board.width,

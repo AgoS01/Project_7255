@@ -3,6 +3,7 @@ import sys
 from buttons_menu import Btn
 from main import Game
 from sandbox import Sandbox as Sbox
+from AnimSpites import Font
 
 pygame.init()
 pygame.mixer.init()
@@ -15,11 +16,6 @@ pygame.display.set_caption('Project 7255')
 BG = pygame.image.load('data/background.jpg')
 img = pygame.image.load('data/logopng.png')
 img.convert_alpha()
-
-
-class Font:
-    def new_font(size):
-        return pygame.font.Font('data/font2.ttf', size)
 
 
 class main_menu:
@@ -62,7 +58,7 @@ class main_menu:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if plus_button.checkForInput(st_ms_pos):
-                        cnf_snd.play()
+                        cnf_snd.play(   )
                         pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() + 0.1)
                     if minus_button.checkForInput(st_ms_pos):
                         cnf_snd.play()
