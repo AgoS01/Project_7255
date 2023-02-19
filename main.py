@@ -52,39 +52,9 @@ class Game:
                             move_counter -= 1
                             sht_snd.play()
                             board.shoot()
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        os.system('python backtomenu.py')
-            screen.fill((0, 0, 0))
-            pygame.draw.rect(screen, "#d55800", (
-                board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
-            board.first_render(screen)
-            board.map_sp.draw(screen)  # создание карты
-            board.render(screen)
-            board.extra_sp.draw(screen)
-            clr = ''
-            if move_counter == 1:
-                clr = '#ff0000'
-            else:
-                clr = '#ffffff'
-            MV_TEXT = Font.new_font(12).render(
-                f'Кол-во оставшихся ходов: {move_counter}', True,
-                clr)
-            MV_RECT = MV_TEXT.get_rect(center=(130, 100))
-            screen.blit(MV_TEXT, MV_RECT)
-            color = ''
-            if board.player == 0:
-                color = 'Зелёные'
-                clr = '#008000'
-            elif board.player == 1:
-                color = 'Красные'
-                clr = '#ff0000'
-            ST_TEXT = Font.new_font(12).render(
-                f'Текущая сторона: {color}', True,
-                clr)
-            ST_RECT = ST_TEXT.get_rect(center=(130, 140))
-            screen.blit(ST_TEXT, ST_RECT)
+                        if event.key == pygame.K_ESCAPE:
+                            pygame.quit()
+                            os.system('python backtomenu.py')
             if move_counter == 0:
                 if board.bullet_ex == 0:
                     board.player = (board.player + 1) % 2
@@ -97,6 +67,52 @@ class Game:
                         board.on_click(tmp_chosen)
                     else:
                         last_chosen = board.focused_cell
+
+            screen.fill((0, 0, 0))
+            pygame.draw.rect(screen, "#d55800", (
+                board.left, board.top, board.cell_size * board.width, board.cell_size * board.height))  # подложка
+            board.first_render(screen)
+            board.map_sp.draw(screen)  # создание карты
+            board.render(screen)
+            board.extra_sp.draw(screen)
+            text_esc = Font.new_font(10).render(
+                f'Для выхода в глав. меню нажмите ESC', True,
+                '#ffffff')
+            rect_esc = text_esc.get_rect(center=(150, 20))
+            screen.blit(text_esc, rect_esc)
+            clr = ''
+            if move_counter == 1:
+                clr = '#ff0000'
+            else:
+                clr = '#ffffff'
+            text_move = Font.new_font(12).render(
+                f'Кол-во оставшихся ходов: {move_counter}', True,
+                clr)
+            rect_move = text_move.get_rect(center=(130, 100))
+            screen.blit(text_move, rect_move)
+            color = ''
+            if board.player == 0:
+                color = 'Зелёные'
+                clr = '#008000'
+            elif board.player == 1:
+                color = 'Красные'
+                clr = '#ff0000'
+            text_team = Font.new_font(12).render(
+                f'Текущая сторона: {color}', True,
+                clr)
+            rect_team = text_team.get_rect(center=(130, 140))
+            screen.blit(text_team, rect_team)
+            if move_counter == 0:
+                board.player = (board.player + 1) % 2
+                move_counter = default_mc
+                board.chosen = 0
+                board.focused.kill()
+                if last_chosen:
+                    tmp_chosen = last_chosen
+                    last_chosen = board.focused_cell
+                    board.on_click(tmp_chosen)
+                else:
+                    last_chosen = board.focused_cell
             board.endgame()
             if ticks >= speed:
                 if time_on:

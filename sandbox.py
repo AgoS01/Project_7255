@@ -3,6 +3,7 @@ import pygame
 import csv
 import os
 from sprites import Sp
+from AnimSpites import Font
 
 
 class sandbox_board(Board):
@@ -30,7 +31,7 @@ class sandbox_board(Board):
             self.c = -1
             self.bull_dest = 0, 0
             self.bullet_ex = 0
-            self.bullet_speed = 50
+            self.bullet_speed = 30
             self.rot_mas = {'7': 180, '8': 0, '9': 270, '10': 90, '5': 270,
                             '6': 90}
 
@@ -311,6 +312,11 @@ class Sandbox:
             board.map_sp.draw(screen)  # создание карты
             board.render(screen)
             board.extra_sp.draw(screen)
+            text_esc = Font.new_font(10).render(
+                f'Для выхода в глав. меню нажмите ESC', True,
+                '#ffffff')
+            rect_esc = text_esc.get_rect(center=(150, 60))
+            screen.blit(text_esc, rect_esc)
             if ticks >= speed:
                 if time_on:
                     board.next_move()

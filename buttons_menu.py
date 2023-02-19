@@ -1,8 +1,3 @@
-class Font:
-    def new_font(size):
-        return pygame.font.Font('data/font2.ttf', size)
-
-
 class Btn():
     def __init__(self, img, pos, txt_inp, font, clr_base,
                  clr_hvr):
