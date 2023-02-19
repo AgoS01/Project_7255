@@ -75,16 +75,21 @@ class Game:
             board.map_sp.draw(screen)  # создание карты
             board.render(screen)
             board.extra_sp.draw(screen)
+            text_esc = Font.new_font(10).render(
+                f'Для выхода в глав. меню нажмите ESC', True,
+                '#ffffff')
+            rect_esc = text_esc.get_rect(center=(150, 20))
+            screen.blit(text_esc, rect_esc)
             clr = ''
             if move_counter == 1:
                 clr = '#ff0000'
             else:
                 clr = '#ffffff'
-            MV_TEXT = Font.new_font(12).render(
+            text_move = Font.new_font(12).render(
                 f'Кол-во оставшихся ходов: {move_counter}', True,
                 clr)
-            MV_RECT = MV_TEXT.get_rect(center=(130, 100))
-            screen.blit(MV_TEXT, MV_RECT)
+            rect_move = text_move.get_rect(center=(130, 100))
+            screen.blit(text_move, rect_move)
             color = ''
             if board.player == 0:
                 color = 'Зелёные'
@@ -92,11 +97,11 @@ class Game:
             elif board.player == 1:
                 color = 'Красные'
                 clr = '#ff0000'
-            ST_TEXT = Font.new_font(12).render(
+            text_team = Font.new_font(12).render(
                 f'Текущая сторона: {color}', True,
                 clr)
-            ST_RECT = ST_TEXT.get_rect(center=(130, 140))
-            screen.blit(ST_TEXT, ST_RECT)
+            rect_team = text_team.get_rect(center=(130, 140))
+            screen.blit(text_team, rect_team)
             if move_counter == 0:
                 board.player = (board.player + 1) % 2
                 move_counter = default_mc
