@@ -33,25 +33,48 @@ class main_menu:
                 True,
                 '#6600ff')
             rect_vl = text_vl.get_rect(center=(660, 200))
+            text_msc = Font.new_font(15).render('Выбор мелодии', True,
+                                                '#6600ff')
+            rect_msc = text_msc.get_rect(center=(1180, 15))
+            pl1_btn = Btn(img=pygame.image.load('data/fon2.png'),
+                          pos=(1125, 55),
+                          txt_inp='►',
+                          font=Font.new_font(15),
+                          clr_base='#ffffff',
+                          clr_hvr="#ffffff")
+            pl2_btn = Btn(img=pygame.image.load('data/da4.png'),
+                          pos=(1180, 55),
+                          txt_inp='►',
+                          font=Font.new_font(15),
+                          clr_base='#ffffff',
+                          clr_hvr="#ffffff")
+            pl3_btn = Btn(img=pygame.image.load('data/fon3.png'),
+                          pos=(1235, 55),
+                          txt_inp='►',
+                          font=Font.new_font(15),
+                          clr_base='#ffffff',
+                          clr_hvr="#ffffff")
             minus_btn = Btn(img=pygame.image.load('data/test1.png'),
                             pos=(420, 400),
                             txt_inp='-', font=Font.new_font(75),
-                            clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                            clr_base='#8000ff',
+                            clr_hvr='#6600cc')
             plus_btn = Btn(img=pygame.image.load('data/test1.png'),
                            pos=(900, 400),
                            txt_inp='+', font=Font.new_font(75),
-                           clr_base='#9933ff',
-                           clr_hvr='#8000ff')
+                           clr_base='#8000ff',
+                           clr_hvr='#6600cc')
             qt_btn = Btn(img=pygame.image.load('data/test4.png'),
                          pos=(660, 550),
                          txt_inp='МЕНЮ', font=Font.new_font(75),
-                         clr_base='#9933ff',
-                         clr_hvr='#8000ff')
+                         clr_base='#8000ff',
+                         clr_hvr='#6600cc')
             screen.blit(text_st, rect_st)
             screen.blit(text_vl, rect_vl)
+            screen.blit(text_msc, rect_msc)
 
-            for button in [minus_btn, plus_btn, qt_btn]:
+            for button in [pl1_btn, pl2_btn, pl3_btn, minus_btn, plus_btn,
+                           qt_btn]:
                 button.changeColor(st_ms_pos)
                 button.update(screen)
 
@@ -60,6 +83,15 @@ class main_menu:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    if pl1_btn.checkForInput(st_ms_pos):
+                        pygame.mixer.music.load('data/menumusic.mp3')
+                        pygame.mixer.music.play(-1)
+                    if pl2_btn.checkForInput(st_ms_pos):
+                        pygame.mixer.music.load('data/dafunk.mp3')
+                        pygame.mixer.music.play(-1)
+                    if pl3_btn.checkForInput(st_ms_pos):
+                        pygame.mixer.music.load('data/landoffire.mp3')
+                        pygame.mixer.music.play(-1)
                     if plus_btn.checkForInput(st_ms_pos):
                         cnf_snd.play()
                         pygame.mixer.music.set_volume(
