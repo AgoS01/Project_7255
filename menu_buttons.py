@@ -25,26 +25,29 @@ class main_menu:
             # Позиция мышки в настройках.
             screen.fill('#a3b4d6')
             text_st = Font.new_font(50).render('Настройка звука', True,
-                                                 '#6600ff')
+                                               '#6600ff')
             rect_st = text_st.get_rect(center=(660, 100))
-            text_vl = Font.new_font(50).render(f'Текущая громкость - {round(pygame.mixer.music.get_volume() * 10)}', True,
-                                                 '#6600ff')
+            text_vl = Font.new_font(50).render(
+                f'Текущая громкость - '
+                f'{round(pygame.mixer.music.get_volume() * 10)}',
+                True,
+                '#6600ff')
             rect_vl = text_vl.get_rect(center=(660, 200))
             minus_btn = Btn(img=pygame.image.load('data/test1.png'),
-                            pos=(400, 400),
+                            pos=(420, 400),
                             txt_inp='-', font=Font.new_font(75),
                             clr_base='#9933ff',
                             clr_hvr='#8000ff')
             plus_btn = Btn(img=pygame.image.load('data/test1.png'),
-                            pos=(850, 400),
-                            txt_inp='+', font=Font.new_font(75),
-                            clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                           pos=(900, 400),
+                           txt_inp='+', font=Font.new_font(75),
+                           clr_base='#9933ff',
+                           clr_hvr='#8000ff')
             qt_btn = Btn(img=pygame.image.load('data/test4.png'),
-                            pos=(640, 550),
-                            txt_inp='МЕНЮ', font=Font.new_font(75),
-                            clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                         pos=(660, 550),
+                         txt_inp='МЕНЮ', font=Font.new_font(75),
+                         clr_base='#9933ff',
+                         clr_hvr='#8000ff')
             screen.blit(text_st, rect_st)
             screen.blit(text_vl, rect_vl)
 
@@ -58,11 +61,15 @@ class main_menu:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if plus_btn.checkForInput(st_ms_pos):
-                        cnf_snd.play(   )
-                        pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() + 0.1)
+                        cnf_snd.play()
+                        pygame.mixer.music.set_volume(
+                            pygame.mixer.music.get_volume() + 0.1)
                     if minus_btn.checkForInput(st_ms_pos):
                         cnf_snd.play()
-                        pygame.mixer.music.set_volume(pygame.mixer.music.get_volume() - 0.1)
+                        if pygame.mixer.music.get_volume() <= 0.1:
+                            pygame.mixer.music.set_volume(0)
+                        pygame.mixer.music.set_volume(
+                            pygame.mixer.music.get_volume() - 0.1)
                     if qt_btn.checkForInput(st_ms_pos):
                         cnf_snd.play()
                         main_menu.main_menu()
@@ -75,17 +82,18 @@ class main_menu:
             screen.blit(img, (330, 20))
             menu_ms_pos = pygame.mouse.get_pos()
             pl_btn = Btn(img=pygame.image.load('data/Play Rect.png'),
-                            pos=(640, 250),
-                            txt_inp='ИГРАТЬ', font=Font.new_font(75),
-                            clr_base='#9933ff', clr_hvr='#8000ff')
+                         pos=(640, 250),
+                         txt_inp='ИГРАТЬ', font=Font.new_font(75),
+                         clr_base='#9933ff', clr_hvr='#8000ff')
             st_btn = Btn(
                 img=pygame.image.load('data/test2.png'), pos=(640, 400),
                 txt_inp='НАСТРОЙКИ',
                 font=Font.new_font(75), clr_base='#9933ff', clr_hvr='#8000ff')
             qt_btn = Btn(img=pygame.image.load('data/test1.png'),
-                            pos=(640, 550),
-                            txt_inp='ВЫЙТИ', font=Font.new_font(75), clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                         pos=(640, 550),
+                         txt_inp='ВЫЙТИ', font=Font.new_font(75),
+                         clr_base='#9933ff',
+                         clr_hvr='#8000ff')
 
             for button in [pl_btn, st_btn, qt_btn]:
                 button.changeColor(menu_ms_pos)
@@ -123,13 +131,13 @@ class play_menu:
         pygame.quit()
         exit()
 
-
     def maps_sbox(mapp):
         while True:
             mapp = ''
             screen.blit(BG, (0, 0))
             menu_ms_pos = pygame.mouse.get_pos()
-            text_menu = Font.new_font(50).render('Выберите карту.', True, '#6600ff')
+            text_menu = Font.new_font(50).render('Выберите карту.', True,
+                                                 '#6600ff')
             rect_menu = text_menu.get_rect(center=(660, 100))
             map1 = Btn(
                 img=pygame.image.load('data/test1.png'), pos=(450, 250),
@@ -137,13 +145,14 @@ class play_menu:
                 font=Font.new_font(75), clr_base='#9933ff', clr_hvr='#8000ff')
             map2 = Btn(img=pygame.image.load('data/test1.png'),
                        pos=(850, 250),
-                       txt_inp='Поле', font=Font.new_font(75), clr_base='#9933ff',
+                       txt_inp='Поле', font=Font.new_font(75),
+                       clr_base='#9933ff',
                        clr_hvr='#8000ff')
             qt_btn = Btn(img=pygame.image.load('data/test4.png'),
-                            pos=(640, 550),
-                            txt_inp='МЕНЮ', font=Font.new_font(75),
-                            clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                         pos=(640, 550),
+                         txt_inp='МЕНЮ', font=Font.new_font(75),
+                         clr_base='#9933ff',
+                         clr_hvr='#8000ff')
 
             screen.blit(text_menu, rect_menu)
             for button in [map1, map2, qt_btn]:
@@ -174,7 +183,8 @@ class play_menu:
             mapp = ''
             screen.blit(BG, (0, 0))
             menu_ms_pos = pygame.mouse.get_pos()
-            text_menu = Font.new_font(50).render('Выберите карту.', True, '#6600ff')
+            text_menu = Font.new_font(50).render('Выберите карту.', True,
+                                                 '#6600ff')
             rect_menu = text_menu.get_rect(center=(660, 100))
             map1 = Btn(
                 img=pygame.image.load('data/test1.png'), pos=(450, 250),
@@ -182,13 +192,14 @@ class play_menu:
                 font=Font.new_font(75), clr_base='#9933ff', clr_hvr='#8000ff')
             map2 = Btn(img=pygame.image.load('data/test1.png'),
                        pos=(850, 250),
-                       txt_inp='Поле', font=Font.new_font(75), clr_base='#9933ff',
+                       txt_inp='Поле', font=Font.new_font(75),
+                       clr_base='#9933ff',
                        clr_hvr='#8000ff')
             qt_btn = Btn(img=pygame.image.load('data/test4.png'),
-                            pos=(640, 550),
-                            txt_inp='МЕНЮ', font=Font.new_font(75),
-                            clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                         pos=(640, 550),
+                         txt_inp='МЕНЮ', font=Font.new_font(75),
+                         clr_base='#9933ff',
+                         clr_hvr='#8000ff')
 
             screen.blit(text_menu, rect_menu)
             for button in [map1, map2, qt_btn]:
@@ -220,17 +231,18 @@ class play_menu:
             screen.blit(img, (330, 20))
             menu_ms_pos = pygame.mouse.get_pos()
             pl_btn = Btn(img=pygame.image.load('data/Play Rect.png'),
-                            pos=(640, 250),
-                            txt_inp='ИГРАТЬ', font=Font.new_font(75),
-                            clr_base='#9933ff', clr_hvr='#8000ff')
+                         pos=(640, 250),
+                         txt_inp='ИГРАТЬ', font=Font.new_font(75),
+                         clr_base='#9933ff', clr_hvr='#8000ff')
             st_btn = Btn(
                 img=pygame.image.load('data/test2.png'), pos=(640, 400),
                 txt_inp='ПЕСОЧНИЦА',
                 font=Font.new_font(75), clr_base='#9933ff', clr_hvr='#8000ff')
             qt_btn = Btn(img=pygame.image.load('data/test4.png'),
-                            pos=(640, 550),
-                            txt_inp='МЕНЮ', font=Font.new_font(75), clr_base='#9933ff',
-                            clr_hvr='#8000ff')
+                         pos=(640, 550),
+                         txt_inp='МЕНЮ', font=Font.new_font(75),
+                         clr_base='#9933ff',
+                         clr_hvr='#8000ff')
 
             for button in [pl_btn, st_btn, qt_btn]:
                 button.changeColor(menu_ms_pos)
@@ -252,7 +264,6 @@ class play_menu:
                         main_menu.main_menu()
 
             pygame.display.update()
-
 
 
 main_menu.main_menu()
