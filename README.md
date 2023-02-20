@@ -3,7 +3,7 @@
 
 We're pleased to see you here, thanks for coming
 
-If You'd like to run project do it via menu_buttons.py
+If You'd like to run project do it via main.py
 
 Rules:
 
