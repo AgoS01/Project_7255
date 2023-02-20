@@ -7,7 +7,7 @@ class Game:
     def main(mapp):
         pygame.init()
         sht_snd = pygame.mixer.Sound('data/vystrel-tanka.mp3')
-        pygame.display.set_caption('Игра')
+        pygame.display.set_caption('Project 7255')
         size = width, height = 1920 * 3 / 4, 1080 * 3 / 4
         screen = pygame.display.set_mode(size)
         board = MainBoard(11, 11, 100, 10, 70, mapp)
