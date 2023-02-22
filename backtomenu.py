@@ -1,5 +1,5 @@
 import pygame
-from menu_buttons import main_menu
+from main import main_menu
 
 
 main_menu.main_menu()
