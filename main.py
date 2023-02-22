@@ -4,18 +4,19 @@ from buttons_menu import Btn
 from main_render import Game
 from sandbox import Sandbox as Sbox
 from AnimSpites import Font
+from load_image import load_image, screen
 
 pygame.init()
 pygame.mixer.init()
 cnf_snd = pygame.mixer.Sound('data/Confirm 1.wav')
-pygame.mixer.music.load('data/menumusic.mp3')
+pygame.mixer.music.load('data/shine.mp3')
 pygame.mixer.music.play(-1)
 clock = pygame.time.Clock()
 screen = pygame.display.set_mode((1280, 800))
 pygame.display.set_caption('Project 7255')
 BG = pygame.image.load('data/background.jpg')
-img = pygame.image.load('data/logopng.png')
-img.convert_alpha()
+logo = pygame.image.load('data/logopng.png')
+logo.convert_alpha()
 
 
 class main_menu:
@@ -84,10 +85,10 @@ class main_menu:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if pl1_btn.checkForInput(st_ms_pos):
-                        pygame.mixer.music.load('data/menumusic.mp3')
+                        pygame.mixer.music.load('data/shine.mp3')
                         pygame.mixer.music.play(-1)
                     if pl2_btn.checkForInput(st_ms_pos):
-                        pygame.mixer.music.load('data/dafunk.mp3')
+                        pygame.mixer.music.load('data/retro.mp3')
                         pygame.mixer.music.play(-1)
                     if pl3_btn.checkForInput(st_ms_pos):
                         pygame.mixer.music.load('data/landoffire.mp3')
@@ -109,23 +110,81 @@ class main_menu:
             pygame.display.update()
 
     def main_menu():
-        while True:
-            screen.blit(BG, (0, 0))
-            screen.blit(img, (330, 20))
+        clock = pygame.time.Clock()
+        running = True
+        timer_animation = pygame.USEREVENT
+        pygame.time.set_timer(timer_animation, 10)
+        all_sprites = pygame.sprite.Group()
+
+        frames = ['1.tiff', '2.tiff', '3.tiff', '4.tiff',
+                  '5.tiff', '6.tiff', '7.tiff', '8.tiff', '9.tiff',
+                  '10.tiff', '11.tiff', '12.tiff', '13.tiff', '14.tiff',
+                  '15.tiff', '16.tiff', '17.tiff', '18.tiff', '19.tiff',
+                  '20.tiff', '21.tiff', '22.tiff', '23.tiff', '24.tiff',
+                  '25.tiff', '26.tiff', '27.tiff', '28.tiff', '29.tiff',
+                  '30.tiff', '31.tiff', '32.tiff', '33.tiff', '34.tiff',
+                  '35.tiff', '36.tiff', '37.tiff', '38.tiff', '39.tiff',
+                  '40.tiff', '41.tiff', '42.tiff', '43.tiff', '44.tiff',
+                  '45.tiff', '46.tiff', '47.tiff', '48.tiff', '49.tiff',
+                  '50.tiff', '51.tiff', '52.tiff', '53.tiff', '54.tiff',
+                  '55.tiff', '56.tiff', '57.tiff', '58.tiff', '59.tiff',
+                  '60.tiff', '61.tiff', '62.tiff', '63.tiff', '64.tiff',
+                  '65.tiff', '66.tiff', '67.tiff', '68.tiff', '69.tiff',
+                  '70.tiff', '71.tiff', '72.tiff', '73.tiff', '74.tiff',
+                  '75.tiff', '76.tiff', '77.tiff', '78.tiff', '79.tiff',
+                  '80.tiff', '81.tiff', '82.tiff', '83.tiff', '84.tiff',
+                  '85.tiff', '86.tiff', '87.tiff', '88.tiff', '89.tiff',
+                  '90.tiff', '91.tiff', '92.tiff', '93.tiff', '94.tiff',
+                  '95.tiff', '96.tiff', '97.tiff', '98.tiff', '99.tiff',
+                  '100.tiff', '101.tiff', '102.tiff', '103.tiff',
+                  '104.tiff', '105.tiff', '106.tiff', '107.tiff',
+                  '108.tiff', '109.tiff', '110.tiff', '111.tiff',
+                  '112.tiff', '113.tiff', '114.tiff', '115.tiff',
+                  '116.tiff', '117.tiff', '118.tiff', '119.tiff',
+                  '120.tiff', '121.tiff', '122.tiff', '123.tiff',
+                  '124.tiff', '125.tiff', '126.tiff', '127.tiff',
+                  '128.tiff', '129.tiff', '130.tiff', '131.tiff',
+                  '132.tiff', '133.tiff', '134.tiff', '135.tiff',
+                  '136.tiff', '137.tiff', '138.tiff', '139.tiff',
+                  '140.tiff', '141.tiff', '142.tiff', '143.tiff',
+                  '144.tiff', '145.tiff', '146.tiff']
+
+        cur_frame = 0
+        background = pygame.sprite.Sprite()
+        background.image = load_image(frames[cur_frame])
+        background.image = pygame.transform.scale(background.image,
+                                                  (1280, 800))
+        background.rect = background.image.get_rect()
+        background.rect.x = 0
+        background.rect.y = 0
+        while running:
+            all_sprites.add(background)
+            screen.blit(background.image, (0, 0))
+            screen.blit(logo, (330, 40))
             menu_ms_pos = pygame.mouse.get_pos()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    sys.exit()
+                if event.type == timer_animation:
+                    cur_frame = (cur_frame + 1) % len(frames)
+                    background.image = load_image(frames[cur_frame])
+                    background.image = pygame.transform.scale(background.image,
+                                                              (1280, 800))
+
             pl_btn = Btn(img=pygame.image.load('data/Play Rect.png'),
-                         pos=(640, 250),
+                         pos=(640, 300),
                          txt_inp='ИГРАТЬ', font=Font.new_font(75),
-                         clr_base='#9933ff', clr_hvr='#8000ff')
+                         clr_base='#9933ff', clr_hvr='#ffffff')
             st_btn = Btn(
-                img=pygame.image.load('data/test2.png'), pos=(640, 400),
+                img=pygame.image.load('data/test2.png'), pos=(640, 450),
                 txt_inp='НАСТРОЙКИ',
-                font=Font.new_font(75), clr_base='#9933ff', clr_hvr='#8000ff')
+                font=Font.new_font(75), clr_base='#9933ff', clr_hvr='#ffffff')
             qt_btn = Btn(img=pygame.image.load('data/test1.png'),
-                         pos=(640, 550),
+                         pos=(640, 600),
                          txt_inp='ВЫЙТИ', font=Font.new_font(75),
                          clr_base='#9933ff',
-                         clr_hvr='#8000ff')
+                         clr_hvr='#ffffff')
 
             for button in [pl_btn, st_btn, qt_btn]:
                 button.changeColor(menu_ms_pos)
@@ -260,7 +319,7 @@ class play_menu:
     def menu():
         while True:
             screen.blit(BG, (0, 0))
-            screen.blit(img, (330, 20))
+            screen.blit(logo, (330, 20))
             menu_ms_pos = pygame.mouse.get_pos()
             pl_btn = Btn(img=pygame.image.load('data/Play Rect.png'),
                          pos=(640, 250),
