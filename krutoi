@@ -1,0 +1,47 @@
+import pygame
+
+
+if __name__ == '__main__':
+    pygame.init()
+    size = w, h = 501, 501
+    screen = pygame.display.set_mode(size)
+	pygame.display.set_caption('К щелчку')
+    running = True
+    start = False
+
+    end = (int(w / 2), int(h / 2))
+    coor = [int(w / 2), int(h / 2)]
+    v, x_pos = 100, 0
+    clock = pygame.time.Clock()
+    fps = 60
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONUP:
+                end = event.pos
+                start = True
+
+        if start:
+            if coor[0] == end[0] and coor[1] == end[1]:
+                start = False
+            new_x = 0
+            new_y = 0
+            if coor[0] != end[0] and coor[0] < end[0]:
+                new_x = v / fps + coor[0]
+            elif coor[0] != end[0] and coor[0] > end[0]:
+                new_x = coor[0] - v / fps
+
+            if coor[1] != end[1] and coor[1] < end[1]:
+                new_y = v / fps + coor[1]
+            elif coor[1] != end[1] and coor[1] > end[1]:
+                new_y = coor[1] - v / fps
+
+            coor = [new_x, new_y]
+        screen.fill((0, 0, 0))
+        pygame.draw.circle(screen, pygame.Color('red'), (coor[0], coor[1]), 20)
+        x_pos += v / fps
+        clock.tick(fps)
+        pygame.display.flip()
+    pygame.quit()
